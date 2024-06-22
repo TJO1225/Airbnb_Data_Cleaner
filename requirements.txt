@@ -5,3 +5,9 @@ flask_wtf
 psycopg2
 python-dotenv
 SQLAlchemy
+pandas
+psycopg2-binary
+requests
+configparser
+apify-client
+python-dotenv

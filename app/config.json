@@ -1,0 +1,38 @@
+{
+    "Search Variables": {
+        "location_query": "22840",
+        "max_listings": 1000,
+        "include_reviews": true,
+        "max_reviews": 500,
+        "calendar_months": 0,
+        "add_more_host_info": false,
+        "currency": "USD",
+        "check_in": "YYYY-MM-DD",
+        "check_out": "YYYY-MM-DD",
+        "limit_points": 100
+    },
+    "Logic Variables": {
+        "Good Data": {
+            "total_months": 9,
+            "missing_months": 3,
+            "avg_reviews_per_month": 2,
+            "min_reviews": 20,
+            "min_bedrooms": 2,
+            "high_season_reviews": 6
+        },
+        "Possibly Good Data": {
+            "total_months": 7,
+            "missing_months": 2,
+            "avg_reviews_per_month": 1,
+            "min_reviews": 10,
+            "min_bedrooms": 1,
+            "high_season_reviews": 4
+        }
+    },
+    "General": {
+        "output_file_name": "airnbnb_test_data_zip_22840",
+        "output_file_format": "excel",
+        "output_directory": "Outputs_Excel",
+        "high_season_override": ""
+    }
+}

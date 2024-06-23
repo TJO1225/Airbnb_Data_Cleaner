@@ -1,6 +1,6 @@
+from datetime import datetime  # Add this import
 from sqlalchemy import Column, Integer, String, DateTime
 from app import db
-
 
 class AirbnbReview(db.Model):
     __tablename__ = "airbnb_reviews"
@@ -10,7 +10,7 @@ class AirbnbReview(db.Model):
     review_text = Column(String(500))
     user_name = Column(String(50))
     rating = Column(Integer)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)  # datetime is now recognized
 
     def __repr__(self):
         return f"<AirbnbReview {self.listing_name} {self.review_date}>"

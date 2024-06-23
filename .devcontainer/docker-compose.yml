@@ -13,6 +13,9 @@ services:
 
     network_mode: service:db
 
+    env_file:
+      - .env
+      
   db:
     image: postgres:latest
     restart: unless-stopped

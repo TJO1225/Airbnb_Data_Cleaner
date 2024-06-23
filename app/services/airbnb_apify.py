@@ -2,7 +2,7 @@ import os
 import json
 from apify_client import ApifyClient
 from dotenv import load_dotenv
-from data_cleaning_packs.utils import load_config
+from services.utils import load_config
 
 load_dotenv()
 

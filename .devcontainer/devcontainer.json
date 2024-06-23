@@ -1,5 +1,5 @@
 {
-  "name": "python-app-service-postgresql-redis-infra",
+  "name": "airbnb_data_cleaner_devcontainer",
   "dockerComposeFile": "docker-compose.yml",
   "service": "app",
   "workspaceFolder": "/workspace",

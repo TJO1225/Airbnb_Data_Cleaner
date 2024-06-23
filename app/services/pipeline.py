@@ -1,6 +1,6 @@
-import data_cleaning_packs.airbnb_apify as airbnb_apify
-from data_cleaning_packs.data_cleaning import main as data_cleaning_main
-from data_cleaning_packs.utils import load_config
+import services.airbnb_apify as airbnb_apify
+from services.data_cleaning import main as data_cleaning_main
+from services.utils import load_config
 import logging
 
 

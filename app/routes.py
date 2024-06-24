@@ -1,15 +1,12 @@
-# app/routes.py
-
 from flask import Blueprint, render_template, request, redirect, url_for, send_file, flash, current_app
-from . import db
-from .models import AirbnbReview
-from .services.data_cleaning import load_config, clean_airbnb_data, save_data
-from .services.airbnb_apify import fetch_airbnb_data
-import json
+from app import db
+from app.models import AirbnbReview
+from app.services.data_cleaning import load_config, clean_airbnb_data, save_data
+from app.services.airbnb_apify import fetch_airbnb_data
 import os
-import pandas as pd
 import threading
 import logging
+import json
 
 logging.basicConfig(level=logging.INFO)
 
@@ -93,15 +90,6 @@ def loading():
     """
     return render_template('loading.html')
 
-@bp.route('/check_processing', methods=['GET'])
-def check_processing():
-    """
-    Check if the processing is complete.
-    """
-    if os.path.exists('processing_complete.txt'):
-        return redirect(url_for('main.download'))
-    return redirect(url_for('main.loading'))
-
 @bp.route('/download')
 def download():
     """
@@ -114,4 +102,3 @@ def download():
     else:
         flash("File not found.")
         return redirect(url_for('main.index'))
-

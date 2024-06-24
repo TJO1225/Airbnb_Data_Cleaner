@@ -6,9 +6,8 @@ import logging
 import os
 import re
 from .utils import load_config
-from .models import AirbnbRawData, AirbnbReview
-from .airbnb_data_cleaner import AirbnbDataCleaner
-from . import db
+from app.models import AirbnbRawData, AirbnbReview
+from app import db
 
 logging.basicConfig(level=logging.INFO)
 

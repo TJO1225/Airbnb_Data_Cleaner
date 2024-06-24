@@ -92,9 +92,6 @@
                 <option value="excel" {% if config['General']['output_file_format'] == 'excel' %}selected{% endif %}>Excel</option>
             </select>
 
-            <label for="output_directory">Output Directory:</label>
-            <input type="text" id="output_directory" name="output_directory" value="{{ config['General']['output_directory'] }}" class="form-control">
-
             <label for="high_season_override">High Season Override:</label>
             <select id="high_season_override" name="high_season_override" class="form-control">
                 <option value="" {% if config['General']['high_season_override'] == '' %}selected{% endif %}></option>

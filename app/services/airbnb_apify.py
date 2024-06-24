@@ -2,7 +2,9 @@ import os
 import json
 from apify_client import ApifyClient
 from dotenv import load_dotenv
-from services.utils import load_config
+from .utils import load_config 
+from . import db
+from .models import AirbnbRawData
 
 load_dotenv()
 
@@ -39,6 +41,12 @@ def fetch_airbnb_data(config):
     data = []
     for item in client.dataset(run["defaultDatasetId"]).iterate_items():
         data.append(item)
+    
+    # Save raw data to the database
+    raw_data_entry = AirbnbRawData(data=data)
+    db.session.add(raw_data_entry)
+    db.session.commit()
+    
     return data
 
 

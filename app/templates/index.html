@@ -11,7 +11,7 @@
 <body>
     <div class="container">
         <h1>Welcome to the Airbnb Data Cleaner</h1>
-        <form action="{{ url_for('submit') }}" method="POST">
+        <form action="{{ url_for('main.run_cleaning') }}" method="POST">
             <h2>Search Variables</h2>
             <label for="location_query">Location Query:</label>
             <input type="text" id="location_query" name="location_query" value="{{ config['Search Variables']['location_query'] }}" class="form-control">
@@ -103,11 +103,9 @@
                 <option value="Q3" {% if config['General']['high_season_override'] == 'Q3' %}selected{% endif %}>Q3</option>
                 <option value="Q4" {% if config['General']['high_season_override'] == 'Q4' %}selected{% endif %}>Q4</option>
             </select>
-
-            <button type="submit" class="btn btn-primary mt-3">Save Configuration</button>
         </form>
 
-        <form action="{{ url_for('run_cleaning') }}" method="POST" class="mt-3">
+        <form action="{{ url_for('main.run_cleaning') }}" method="POST" class="mt-3">
             <button type="submit" class="btn btn-success">Run Data Cleaning</button>
         </form>
     </div>

@@ -5,6 +5,10 @@ from collections import defaultdict
 import logging
 import os
 import re
+from .utils import load_config
+from .models import AirbnbRawData, AirbnbReview
+from .airbnb_data_cleaner import AirbnbDataCleaner
+from . import db
 
 logging.basicConfig(level=logging.INFO)
 
@@ -304,8 +308,9 @@ class AirbnbDataCleaner:
             logging.error(f"Unsupported file format: {file_format}")
 
 
-def clean_airbnb_data(airbnb_data, config):
-    data_cleaner = AirbnbDataCleaner(airbnb_data)
+def clean_airbnb_data(raw_data_entries, config):
+    all_data = [entry.data for entry in raw_data_entries]
+    data_cleaner = AirbnbDataCleaner(all_data)
     thresholds = get_thresholds(config)
     cleaned_data = data_cleaner.clean_data(thresholds)
     df = data_cleaner.create_dataframe(cleaned_data)
@@ -313,20 +318,35 @@ def clean_airbnb_data(airbnb_data, config):
 
 
 def save_data(df, config):
-    output_directory = config["General"]["output_directory"]
+    """
+    Save cleaned data to the database and generate output file.
+    """
+    # Save cleaned data back to the database
+    for index, row in df.iterrows():
+        review = AirbnbReview(
+            listing_name=row.get('Listing Name', None),
+            review_date=row.get('review_date', None),
+            review_text=row.get('review_text', None),
+            user_name=row.get('user_name', None),
+            rating=row.get('rating', None),
+            created_at=row.get('created_at', None)
+        )
+        db.session.add(review)
+    db.session.commit()
+    
+    # Generate output file for download
     output_file_name = config["General"]["output_file_name"]
     output_file_format = config["General"]["output_file_format"]
-
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory)
+    output_file_path = os.path.join("outputs", f"{output_file_name}.{output_file_format}")
 
     if output_file_format == "csv":
-        df.to_csv(f"{output_directory}/{output_file_name}.csv", index=False)
+        df.to_csv(output_file_path, index=False)
     elif output_file_format == "excel":
-        df.to_excel(f"{output_directory}/{output_file_name}.xlsx", index=False)
+        df.to_excel(output_file_path, index=False)
     else:
         logging.error("Unsupported file format")
 
+    return output_file_path
 
 def main(airbnb_data):
     try:

@@ -8,6 +8,7 @@ import re
 from .utils import load_config
 from app.models import AirbnbRawData, AirbnbReview
 from app import db
+import openpyxl
 
 logging.basicConfig(level=logging.INFO)
 
@@ -328,11 +329,9 @@ def clean_airbnb_data(raw_data_entries, config):
     logging.info("Airbnb data cleaned successfully.")
     return df
 
-
-
-def save_data(df, config):
+def save_data(df, output_file_path, output_file_format):
     """
-    Save cleaned data to the database and generate output file.
+    Save cleaned data to the specified output file.
     """
     # Serialize cleaned data to JSON
     serialized_data = df.to_json(orient='records')
@@ -354,20 +353,23 @@ def save_data(df, config):
         )
         db.session.add(review)
     db.session.commit()
-    
-    # Generate output file for download
-    output_file_name = config["General"]["output_file_name"]
-    output_file_format = config["General"]["output_file_format"]
-    output_file_path = os.path.join("outputs", f"{output_file_name}.{output_file_format}")
 
+    # Generate output file for download
+    logging.info(f"Saving data to: {output_file_path} with format: {output_file_format}")
     if output_file_format == "csv":
         df.to_csv(output_file_path, index=False)
-    elif output_file_format == "excel":
-        df.to_excel(output_file_path, index=False)
+    elif output_file_format == "xlsx":
+        df.to_excel(output_file_path, index=False, engine='openpyxl')
     else:
         logging.error("Unsupported file format")
+        raise ValueError("Unsupported file format")
 
-    return output_file_path
+    # Verify file creation
+    if os.path.exists(output_file_path):
+        logging.info(f"File successfully saved: {output_file_path}")
+    else:
+        logging.error(f"File not found after save attempt: {output_file_path}")
+
 
 def main(airbnb_data):
     try:

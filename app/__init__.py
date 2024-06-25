@@ -19,6 +19,11 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = config.get('DEFAULT', 'SQLALCHEMY_DATABASE_URI')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = config.getboolean('DEFAULT', 'SQLALCHEMY_TRACK_MODIFICATIONS')
 
+    # Configure TEMP_DIR
+    app.config['TEMP_DIR'] = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'temp')
+    if not os.path.exists(app.config['TEMP_DIR']):
+        os.makedirs(app.config['TEMP_DIR'])
+
     db.init_app(app)
     migrate.init_app(app, db)
 

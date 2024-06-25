@@ -6,3 +6,4 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     DEBUG = True
+    TEMP_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'temp')

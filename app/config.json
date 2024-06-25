@@ -1,6 +1,6 @@
 {
     "Search Variables": {
-        "location_query": "10570",
+        "location_query": "Yuma, AZ",
         "max_listings": 100,
         "include_reviews": true,
         "max_reviews": 500,
@@ -30,8 +30,8 @@
         }
     },
     "General": {
-        "output_file_name": "airnbnb_test_data_zip_22840",
-        "output_file_format": "excel",
+        "output_file_name": "airnbnb_new_test1",
+        "output_file_format": "xlsx",
         "output_directory": "Outputs_Excel",
         "high_season_override": ""
     }

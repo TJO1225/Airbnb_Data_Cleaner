@@ -308,18 +308,40 @@ class AirbnbDataCleaner:
 
 
 def clean_airbnb_data(raw_data_entries, config):
-    all_data = [entry.data for entry in raw_data_entries]
+    """
+    Clean the raw Airbnb data based on the provided configuration.
+    """
+    logging.info("Starting to clean Airbnb data.")
+    
+    # Check if raw_data_entries is a list of dictionaries
+    if isinstance(raw_data_entries, list) and all(isinstance(entry, dict) for entry in raw_data_entries):
+        all_data = raw_data_entries  # No need to access `.data`
+    else:
+        logging.error("Invalid data format received for cleaning.")
+        raise ValueError("Invalid data format received for cleaning.")
+
     data_cleaner = AirbnbDataCleaner(all_data)
     thresholds = get_thresholds(config)
     cleaned_data = data_cleaner.clean_data(thresholds)
     df = data_cleaner.create_dataframe(cleaned_data)
+    
+    logging.info("Airbnb data cleaned successfully.")
     return df
+
 
 
 def save_data(df, config):
     """
     Save cleaned data to the database and generate output file.
     """
+    # Serialize cleaned data to JSON
+    serialized_data = df.to_json(orient='records')
+
+    # Save cleaned data back to the database
+    raw_data_entry = AirbnbRawData(data=serialized_data)
+    db.session.add(raw_data_entry)
+    db.session.commit()
+
     # Save cleaned data back to the database
     for index, row in df.iterrows():
         review = AirbnbReview(

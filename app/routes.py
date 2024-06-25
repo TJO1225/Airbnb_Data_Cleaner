@@ -1,6 +1,6 @@
+# app/routes.py
+
 from flask import Blueprint, render_template, request, redirect, url_for, send_file, flash, current_app
-from app import db
-from app.models import AirbnbReview
 from app.services.data_cleaning import load_config, clean_airbnb_data, save_data
 from app.services.airbnb_apify import fetch_airbnb_data
 import os
@@ -52,36 +52,50 @@ def run_cleaning():
 
     logging.info("Configuration updated successfully.")
 
-    # Fetch data from Airbnb API
-    airbnb_data = fetch_airbnb_data(config)
+    # Redirect to the loading page immediately
+    loading_url = url_for('main.loading')
+    response = redirect(loading_url)
 
-    if not airbnb_data:
-        flash("Failed to fetch data from Airbnb API.")
-        logging.error("Failed to fetch data from Airbnb API.")
-        return redirect(url_for('main.index'))
+    # Start the data fetching and cleaning process in a separate thread
+    def background_task():
+        airbnb_data = fetch_airbnb_data(config)
+        if not airbnb_data:
+            logging.error("Failed to fetch data from Airbnb API.")
+            return
 
-    # Run cleaning process in a separate thread
-    cleaning_thread = threading.Thread(target=run_cleaning_process, args=(config, airbnb_data))
+        run_cleaning_process(config, airbnb_data)
+
+    cleaning_thread = threading.Thread(target=background_task)
     cleaning_thread.start()
 
     logging.info("Data cleaning process started.")
     return redirect(url_for('main.loading'))
+
 
 def run_cleaning_process(config, airbnb_data):
     """
     Run the data cleaning process.
     Save cleaned data back to the database and generate the output file.
     """
-    # Clean the data
-    cleaned_df = clean_airbnb_data(airbnb_data, config)
+    logging.info("Starting data cleaning process.")
     
-    # Save cleaned data to database and generate output file
-    output_file_path = save_data(cleaned_df, config)
-    
-    logging.info("Data cleaning process completed and saved to database.")
-    
-    # After processing, store the file path in a session variable or similar mechanism
-    current_app.config['output_file_path'] = output_file_path
+    # Set up application context
+    with current_app.app_context():
+        try:
+            # Clean the data
+            cleaned_df = clean_airbnb_data(airbnb_data, config)
+            logging.info("Data cleaning process completed.")
+            
+            # Save cleaned data to database and generate output file
+            output_file_path = save_data(cleaned_df, config)
+            logging.info("Data saved successfully.")
+            
+            # After processing, store the file path in a session variable or similar mechanism
+            current_app.config['output_file_path'] = output_file_path
+            logging.info(f"Output file path set: {output_file_path}")
+        except Exception as e:
+            logging.error(f"Error during data cleaning process: {e}", exc_info=True)
+
 
 @bp.route('/loading')
 def loading():
@@ -89,6 +103,15 @@ def loading():
     Display the loading page while the data cleaning process runs.
     """
     return render_template('loading.html')
+
+@bp.route('/check_processing', methods=['GET'])
+def check_processing():
+    """
+    Check if the processing is complete.
+    """
+    if current_app.config.get('output_file_path'):
+        return redirect(url_for('main.download'))
+    return redirect(url_for('main.loading'))
 
 @bp.route('/download')
 def download():

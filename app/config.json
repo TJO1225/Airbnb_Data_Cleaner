@@ -1,7 +1,7 @@
 {
     "Search Variables": {
-        "location_query": "22840",
-        "max_listings": 1000,
+        "location_query": "10570",
+        "max_listings": 100,
         "include_reviews": true,
         "max_reviews": 500,
         "calendar_months": 0,

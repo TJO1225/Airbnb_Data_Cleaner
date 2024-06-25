@@ -3,6 +3,7 @@ import json
 from apify_client import ApifyClient
 from dotenv import load_dotenv
 from .utils import load_config 
+import logging
 
 load_dotenv()
 
@@ -37,6 +38,8 @@ def fetch_airbnb_data(config):
 
     # Fetch and return Actor results from the run's dataset (if there are any)
     data = [item for item in client.dataset(run["defaultDatasetId"]).iterate_items()]
+
+    logging.info(f"Fetched data: {data}")  # Add logging for the fetched data
 
     return data
 

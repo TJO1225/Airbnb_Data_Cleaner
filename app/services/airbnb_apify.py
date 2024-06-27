@@ -1,24 +1,14 @@
 import os
-import json
 from apify_client import ApifyClient
 from dotenv import load_dotenv
-from .utils import load_config 
 import logging
 
 load_dotenv()
 
-
-def load_config(file_path):
-    with open(file_path, "r") as f:
-        return json.load(f)
-
-
 def fetch_airbnb_data(config):
-    # Initialize the ApifyClient with your API token
     apify_token = os.getenv("APIFY_TOKEN")
     client = ApifyClient(apify_token)
 
-    # Prepare the Actor input
     run_input = {
         "locationQuery": config["Search Variables"]["location_query"],
         "maxListings": config["Search Variables"]["max_listings"],
@@ -33,24 +23,11 @@ def fetch_airbnb_data(config):
         "limitPoints": config["Search Variables"]["limit_points"],
     }
 
-    # Run the Actor and wait for it to finish
     run = client.actor("GsNzxEKzE2vQ5d9HN").call(run_input=run_input)
-
-    # Fetch and return Actor results from the run's dataset (if there are any)
     data = [item for item in client.dataset(run["defaultDatasetId"]).iterate_items()]
-
-    logging.info(f"Fetched data: {data}")  # Add logging for the fetched data
-
+    logging.info(f"Fetched data: {data}")
     return data
 
-
-def main(config_path="config.json"):
-    config = load_config(config_path)
+def main(config):
     airbnb_data = fetch_airbnb_data(config)
     return airbnb_data
-
-if __name__ == "__main__":
-    import sys
-    config_path = sys.argv[1] if len(sys.argv) > 1 else "config.json"
-    airbnb_data = main(config_path)
-    print(airbnb_data)

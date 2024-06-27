@@ -1,6 +1,6 @@
 {
     "Search Variables": {
-        "location_query": "Barstow, CA",
+        "location_query": "Truckee, CA",
         "max_listings": 100,
         "include_reviews": true,
         "max_reviews": 300,
@@ -30,7 +30,7 @@
         }
     },
     "General": {
-        "output_file_name": "I_hope_not_2C_9",
+        "output_file_name": "I_hope_not_2C_10",
         "output_file_format": "xlsx",
         "output_directory": "Outputs_Excel",
         "high_season_override": ""

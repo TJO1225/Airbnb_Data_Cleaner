@@ -12,92 +12,93 @@
         <form action="{{ url_for('main.update_config') }}" method="POST">
             <h2>Search Variables</h2>
             <label for="location_query">Location Query:</label>
-            <input type="text" id="location_query" name="Search Variables[location_query]" class="form-control">
+            <input type="text" id="location_query" name="location_query" class="form-control" value="">
 
             <label for="max_listings">Max Listings:</label>
-            <input type="number" id="max_listings" name="Search Variables[max_listings]" class="form-control">
+            <input type="number" id="max_listings" name="max_listings" class="form-control" value="10">
 
             <label for="include_reviews">Include Reviews:</label>
-            <input type="checkbox" id="include_reviews" name="Search Variables[include_reviews]" class="form-check-input">
+            <input type="checkbox" id="include_reviews" name="include_reviews" checked class="form-check-input">
 
             <label for="max_reviews">Max Reviews:</label>
-            <input type="number" id="max_reviews" name="Search Variables[max_reviews]" class="form-control">
+            <input type="number" id="max_reviews" name="max_reviews" class="form-control" value="300">
 
             <label for="calendar_months">Calendar Months:</label>
-            <input type="number" id="calendar_months" name="Search Variables[calendar_months]" class="form-control">
+            <input type="number" id="calendar_months" name="calendar_months" class="form-control" value="0">
 
             <label for="add_more_host_info">Add More Host Info:</label>
-            <input type="checkbox" id="add_more_host_info" name="Search Variables[add_more_host_info]" class="form-check-input">
+            <input type="checkbox" id="add_more_host_info" name="add_more_host_info" class="form-check-input">
 
             <label for="currency">Currency:</label>
-            <input type="text" id="currency" name="Search Variables[currency]" class="form-control">
+            <input type="text" id="currency" name="currency" class="form-control" value="USD">
 
             <label for="check_in">Check-In:</label>
-            <input type="date" id="check_in" name="Search Variables[check_in]" class="form-control">
+            <input type="date" id="check_in" name="check_in" class="form-control">
 
             <label for="check_out">Check-Out:</label>
-            <input type="date" id="check_out" name="Search Variables[check_out]" class="form-control">
+            <input type="date" id="check_out" name="check_out" class="form-control">
 
             <label for="limit_points">Limit Points:</label>
-            <input type="number" id="limit_points" name="Search Variables[limit_points]" class="form-control">
+            <input type="number" id="limit_points" name="limit_points" class="form-control" value="100">
 
             <h2>Logic Variables</h2>
             <h3>Good Data</h3>
             <label for="total_months">Total Months:</label>
-            <input type="number" id="total_months" name="Logic Variables[Good Data][total_months]" class="form-control">
+            <input type="number" id="total_months" name="total_months" class="form-control" value="9">
 
             <label for="missing_months">Missing Months:</label>
-            <input type="number" id="missing_months" name="Logic Variables[Good Data][missing_months]" class="form-control">
+            <input type="number" id="missing_months" name="missing_months" class="form-control" value="3">
 
             <label for="avg_reviews_per_month">Avg Reviews Per Month:</label>
-            <input type="number" id="avg_reviews_per_month" name="Logic Variables[Good Data][avg_reviews_per_month]" class="form-control">
+            <input type="number" id="avg_reviews_per_month" name="avg_reviews_per_month" class="form-control" value="2">
 
             <label for="min_reviews">Min Reviews:</label>
-            <input type="number" id="min_reviews" name="Logic Variables[Good Data][min_reviews]" class="form-control">
+            <input type="number" id="min_reviews" name="min_reviews" class="form-control" value="20">
 
             <label for="min_bedrooms">Min Bedrooms:</label>
-            <input type="number" id="min_bedrooms" name="Logic Variables[Good Data][min_bedrooms]" class="form-control">
+            <input type="number" id="min_bedrooms" name="min_bedrooms" class="form-control" value="2">
 
             <label for="high_season_reviews">High Season Reviews:</label>
-            <input type="number" id="high_season_reviews" name="Logic Variables[Good Data][high_season_reviews]" class="form-control">
+            <input type="number" id="high_season_reviews" name="high_season_reviews" class="form-control" value="6">
 
             <h3>Possibly Good Data</h3>
             <label for="total_months_pgd">Total Months:</label>
-            <input type="number" id="total_months_pgd" name="Logic Variables[Possibly Good Data][total_months]" class="form-control">
+            <input type="number" id="total_months_pgd" name="total_months_pgd" class="form-control" value="7">
 
             <label for="missing_months_pgd">Missing Months:</label>
-            <input type="number" id="missing_months_pgd" name="Logic Variables[Possibly Good Data][missing_months]" class="form-control">
+            <input type="number" id="missing_months_pgd" name="missing_months_pgd" class="form-control" value="2">
 
             <label for="avg_reviews_per_month_pgd">Avg Reviews Per Month:</label>
-            <input type="number" id="avg_reviews_per_month_pgd" name="Logic Variables[Possibly Good Data][avg_reviews_per_month]" class="form-control">
+            <input type="number" id="avg_reviews_per_month_pgd" name="avg_reviews_per_month_pgd" class="form-control" value="1">
 
             <label for="min_reviews_pgd">Min Reviews:</label>
-            <input type="number" id="min_reviews_pgd" name="Logic Variables[Possibly Good Data][min_reviews]" class="form-control">
+            <input type="number" id="min_reviews_pgd" name="min_reviews_pgd" class="form-control" value="10">
 
             <label for="min_bedrooms_pgd">Min Bedrooms:</label>
-            <input type="number" id="min_bedrooms_pgd" name="Logic Variables[Possibly Good Data][min_bedrooms]" class="form-control">
+            <input type="number" id="min_bedrooms_pgd" name="min_bedrooms_pgd" class="form-control" value="1">
 
             <label for="high_season_reviews_pgd">High Season Reviews:</label>
-            <input type="number" id="high_season_reviews_pgd" name="Logic Variables[Possibly Good Data][high_season_reviews]" class="form-control">
+            <input type="number" id="high_season_reviews_pgd" name="high_season_reviews_pgd" class="form-control" value="4">
 
             <h2>General</h2>
             <label for="output_file_name">Output File Name:</label>
-            <input type="text" id="output_file_name" name="General[output_file_name]" class="form-control">
+            <input type="text" id="output_file_name" name="output_file_name" class="form-control" value="">
 
             <label for="output_file_format">Output File Format:</label>
-            <select id="output_file_format" name="General[output_file_format]" class="form-control">
+            <select id="output_file_format" name="output_file_format" class="form-control">
                 <option value="csv">CSV</option>
-                <option value="excel">Excel</option>
+                <option value="xlsx" selected>Excel</option>
             </select>
 
             <label for="high_season_override">High Season Override:</label>
-            <select id="high_season_override" name="General[high_season_override]" class="form-control">
+            <select id="high_season_override" name="high_season_override" class="form-control">
                 <option value=""></option>
                 <option value="Q1">Q1</option>
                 <option value="Q2">Q2</option>
                 <option value="Q3">Q3</option>
                 <option value="Q4">Q4</option>
             </select>
+
             <button type="submit" class="btn btn-success mt-3">Run Data Cleaning</button>
         </form>
     </div>

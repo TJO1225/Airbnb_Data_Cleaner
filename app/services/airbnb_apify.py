@@ -44,12 +44,13 @@ def fetch_airbnb_data(config):
     return data
 
 
-def main():
-    config = load_config("config.json")
+def main(config_path="config.json"):
+    config = load_config(config_path)
     airbnb_data = fetch_airbnb_data(config)
     return airbnb_data
 
-
 if __name__ == "__main__":
-    airbnb_data = main()
+    import sys
+    config_path = sys.argv[1] if len(sys.argv) > 1 else "config.json"
+    airbnb_data = main(config_path)
     print(airbnb_data)

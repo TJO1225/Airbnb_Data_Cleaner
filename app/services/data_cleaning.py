@@ -371,16 +371,19 @@ def save_data(df, output_file_path, output_file_format):
         logging.error(f"File not found after save attempt: {output_file_path}")
 
 
-def main(airbnb_data):
+def main(config_path="config.json"):
     try:
-        config = load_config("config.json")
+        config = load_config(config_path)
+        # Here, you should retrieve data in an appropriate way, this is an example
+        airbnb_data = fetch_airbnb_data(config)  # This function should be defined or imported appropriately
         cleaned_df = clean_airbnb_data(airbnb_data, config)
-        save_data(cleaned_df, config)
+        output_file_path = config['General']['output_file_path']
+        output_file_format = config['General']['output_file_format']
+        save_data(cleaned_df, output_file_path, output_file_format)
     except Exception as e:
-        logging.error(f"Error: {e}")
-
+        logging.error(f"Error in data cleaning pipeline: {e}")
 
 if __name__ == "__main__":
-    # This script expects the airbnb_data to be passed as an argument
-    # We'll use the updated airbnb_apify.py script to pass the data
-    pass
+    import sys
+    config_path = sys.argv[1] if len(sys.argv) > 1 else "config.json"
+    main(config_path)

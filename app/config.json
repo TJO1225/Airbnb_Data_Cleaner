@@ -1,9 +1,9 @@
 {
     "Search Variables": {
-        "location_query": "Yuma, AZ",
+        "location_query": "Barstow, CA",
         "max_listings": 100,
         "include_reviews": true,
-        "max_reviews": 500,
+        "max_reviews": 300,
         "calendar_months": 0,
         "add_more_host_info": false,
         "currency": "USD",
@@ -30,7 +30,7 @@
         }
     },
     "General": {
-        "output_file_name": "airnbnb_new_test1",
+        "output_file_name": "I_hope_not_2C_9",
         "output_file_format": "xlsx",
         "output_directory": "Outputs_Excel",
         "high_season_override": ""

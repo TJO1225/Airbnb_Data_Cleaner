@@ -1,5 +1,5 @@
 import json
-
+import logging
 
 def load_config(file_path):
     """
@@ -15,8 +15,8 @@ def load_config(file_path):
         with open(file_path, "r") as f:
             return json.load(f)
     except FileNotFoundError:
-        print(f"File not found: {file_path}")
+        logging.error(f"File not found: {file_path}")
         return {}
     except json.JSONDecodeError:
-        print(f"Invalid JSON format in file: {file_path}")
+        logging.error(f"Invalid JSON format in file: {file_path}")
         return {}

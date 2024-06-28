@@ -6,7 +6,7 @@ class Config:
     SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
     DEBUG = os.getenv('FLASK_DEBUG', 'False') == 'True'
     SESSION_TYPE = 'sqlalchemy'  # Use SQLAlchemy for session management
-    SESSION_SQLALCHEMY = None  # This will be set in the app factory
+    SESSION_SQLALCHEMY_TABLE = 'sessions'  # Name of the table for sessions
 
 class DevelopmentConfig(Config):
     SQLALCHEMY_DATABASE_URI = os.getenv('AZURE_POSTGRESQL_CONNECTIONSTRING')

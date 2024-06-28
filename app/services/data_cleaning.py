@@ -27,6 +27,7 @@ def get_thresholds(config):
         "good_data": config["Logic Variables"].get("Good Data", {}),
         "possibly_good_data": config["Logic Variables"].get("Possibly Good Data", {}),
         "high_season_override": config["General"].get("high_season_override", ""),
+        "min_bedrooms": config["General"].get("min_bedrooms")  
     }
 
 class AirbnbDataCleaner:
@@ -132,39 +133,74 @@ class AirbnbDataCleaner:
         return "Not Good Data", reason
 
     def is_good_data(self, listing, historical_data, thresholds):
+        min_bedrooms = thresholds.get("min_bedrooms", float("inf"))
         return (
-            historical_data["total_months"] >= thresholds.get("total_months", float("inf"))
-            and historical_data["missing_months"] <= thresholds.get("missing_months", float("-inf"))
-            and historical_data["avg_reviews_per_month"] >= thresholds.get("avg_reviews_per_month", float("-inf"))
-            and historical_data["total_reviews"] >= thresholds.get("min_reviews", float("inf"))
-            and self.get_bedroom_count(listing) >= thresholds.get("min_bedrooms", float("inf"))
-            and historical_data["high_season_reviews"] >= thresholds.get("high_season_reviews", float("-inf"))
+            historical_data["total_months"]
+            >= thresholds.get("total_months", float("inf"))
+            and historical_data["missing_months"]
+            <= thresholds.get("missing_months", float("-inf"))
+            and historical_data["avg_reviews_per_month"]
+            >= thresholds.get("avg_reviews_per_month", float("-inf"))
+            and historical_data["total_reviews"]
+            >= thresholds.get("min_reviews", float("inf"))
+            and self.get_bedroom_count(listing)
+            >= min_bedrooms
+            and historical_data["high_season_reviews"]
+            >= thresholds.get("high_season_reviews", float("-inf"))
         )
 
     def is_possibly_good_data(self, listing, historical_data, thresholds):
+        min_bedrooms = thresholds.get("min_bedrooms", float("inf"))
         return (
-            thresholds.get("total_months", float("inf")) > historical_data["total_months"] >= thresholds.get("total_months", float("-inf"))
-            and historical_data["missing_months"] <= thresholds.get("missing_months", float("-inf"))
-            and historical_data["avg_reviews_per_month"] >= thresholds.get("avg_reviews_per_month", float("-inf"))
-            and historical_data["total_reviews"] >= thresholds.get("min_reviews", float("inf"))
-            and self.get_bedroom_count(listing) >= thresholds.get("min_bedrooms", float("inf"))
-            and historical_data["high_season_reviews"] >= thresholds.get("high_season_reviews", float("-inf"))
+            thresholds.get("total_months", float("inf"))
+            > historical_data["total_months"]
+            >= thresholds.get("total_months", float("-inf"))
+            and historical_data["missing_months"]
+            <= thresholds.get("missing_months", float("-inf"))
+            and historical_data["avg_reviews_per_month"]
+            >= thresholds.get("avg_reviews_per_month", float("-inf"))
+            and historical_data["total_reviews"]
+            >= thresholds.get("min_reviews", float("inf"))
+            and self.get_bedroom_count(listing)
+            >= min_bedrooms
+            and historical_data["high_season_reviews"]
+            >= thresholds.get("high_season_reviews", float("-inf"))
         )
 
     def not_good_data_reason(self, listing, historical_data, thresholds):
         reasons = []
-        if historical_data["total_reviews"] < thresholds.get("min_reviews", float("inf")):
+        if historical_data["total_reviews"] < thresholds.get(
+            "min_reviews", float("inf")
+        ):
             reasons.append(f"Less than {thresholds.get('min_reviews')} total reviews")
-        if historical_data["total_months"] < thresholds.get("total_months", float("inf")):
-            reasons.append(f"Only {historical_data['total_months']} months of historical data")
-        if historical_data["missing_months"] > thresholds.get("missing_months", float("-inf")):
-            reasons.append(f"More than {thresholds.get('missing_months')} missing months of data")
-        if historical_data["avg_reviews_per_month"] < thresholds.get("avg_reviews_per_month", float("-inf")):
-            reasons.append(f"Less than {thresholds.get('avg_reviews_per_month')} reviews per month on average")
-        if self.get_bedroom_count(listing) < thresholds.get("min_bedrooms", float("inf")):
+        if historical_data["total_months"] < thresholds.get(
+            "total_months", float("inf")
+        ):
+            reasons.append(
+                f"Only {historical_data['total_months']} months of historical data"
+            )
+        if historical_data["missing_months"] > thresholds.get(
+            "missing_months", float("-inf")
+        ):
+            reasons.append(
+                f"More than {thresholds.get('missing_months')} missing months of data"
+            )
+        if historical_data["avg_reviews_per_month"] < thresholds.get(
+            "avg_reviews_per_month", float("-inf")
+        ):
+            reasons.append(
+                f"Less than {thresholds.get('avg_reviews_per_month')} reviews per month on average"
+            )
+        if self.get_bedroom_count(listing) < thresholds.get(
+            "min_bedrooms", float("inf")
+        ):
             reasons.append(f"Only {self.get_bedroom_count(listing)} bedrooms")
-        if historical_data["high_season_reviews"] < thresholds.get("high_season_reviews", float("-inf")):
-            reasons.append(f"Less than {thresholds.get('high_season_reviews')} reviews in high season")
+        if historical_data["high_season_reviews"] < thresholds.get(
+            "high_season_reviews", float("-inf")
+        ):
+            reasons.append(
+                f"Less than {thresholds.get('high_season_reviews')} reviews in high season"
+            )
         return "; ".join(reasons)
 
     def create_dataframe(self, cleaned_data):
@@ -252,13 +288,3 @@ def save_data(df, output_file_path, output_file_format):
     else:
         logging.error(f"File not found after save attempt: {output_file_path}")
 
-def main(config):
-    airbnb_data = fetch_airbnb_data(config)
-    cleaned_df = clean_airbnb_data(airbnb_data, config)
-    output_file_path = config['General']['output_file_path']
-    output_file_format = config['General']['output_file_format']
-    save_data(cleaned_df, output_file_path, output_file_format)
-
-
-if __name__ == "__main__":
-    main()

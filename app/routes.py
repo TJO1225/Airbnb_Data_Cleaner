@@ -50,7 +50,6 @@ def update_config():
                 "missing_months": int(form_data.get("missing_months", [0])[0]),
                 "avg_reviews_per_month": int(form_data.get("avg_reviews_per_month", [0])[0]),
                 "min_reviews": int(form_data.get("min_reviews", [0])[0]),
-                "min_bedrooms": int(form_data.get("min_bedrooms", [0])[0]),
                 "high_season_reviews": int(form_data.get("high_season_reviews", [0])[0])
             },
             "Possibly Good Data": {
@@ -58,14 +57,14 @@ def update_config():
                 "missing_months": int(form_data.get("missing_months_pgd", [0])[0]),
                 "avg_reviews_per_month": int(form_data.get("avg_reviews_per_month_pgd", [0])[0]),
                 "min_reviews": int(form_data.get("min_reviews_pgd", [0])[0]),
-                "min_bedrooms": int(form_data.get("min_bedrooms_pgd", [0])[0]),
                 "high_season_reviews": int(form_data.get("high_season_reviews_pgd", [0])[0])
             }
         },
         "General": {
             "output_file_name": form_data.get("output_file_name", [""])[0],
             "output_file_format": form_data.get("output_file_format", [""])[0],
-            "high_season_override": form_data.get("high_season_override", [""])[0]
+            "high_season_override": form_data.get("high_season_override", [""])[0],
+            "min_bedrooms": int(form_data.get("min_bedrooms", [0])[0])
         }
     }
 

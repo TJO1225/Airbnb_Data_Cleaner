@@ -7,10 +7,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Download Complete</title>
 </head>
-<body>
+<body style="background-color: green;"></body>
     <div style="text-align:center;">
-        <h1>Your data processing is complete!</h1>
-        <p>You can download your processed data by clicking the button below.</p>
+    </br>
+    </br>
+    </br>
+        <h1 style="font-style: italic; font-size: 40px;"><strong>$$$ Hell Yeah! $$$</strong></h1>
+     </br>   
+        <h3>You can download your processed data by clicking the button below.</h3>
         <!-- Use the file_name variable to dynamically set the download link -->
         <a href="{{ url_for('main.download_file', file_name=file_name) }}" class="btn btn-primary">Download</a>
         <br><br>

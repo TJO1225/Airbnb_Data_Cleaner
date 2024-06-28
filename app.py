@@ -4,6 +4,7 @@ from flask import Flask, redirect, render_template, request, send_from_directory
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
+from flask_session import Session  # Import Session
 
 app = Flask(__name__)
 csrf = CSRFProtect(app)
@@ -15,6 +16,9 @@ if "WEBSITE_HOSTNAME" not in os.environ:
 else:
     # Production
     app.config.from_object('config.ProductionConfig')
+
+# Initialize session
+Session(app)
 
 # Initialize the database connection
 db = SQLAlchemy(app)

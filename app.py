@@ -1,43 +1,49 @@
-# Import your blueprint
-from app.routes import bp as main_bp
+from flask import Flask, render_template, redirect, url_for, flash, send_from_directory
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_session import Session
+import os
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
-csrf = CSRFProtect(app)
 
 # Load configuration based on environment
-if "WEBSITE_HOSTNAME" not in os.environ:
+if "WEBSITE_HOSTNAME" in os.environ:
+    # Running on Azure
+    app.config.from_object('config.ProductionConfig')
+else:
     # Local development
     app.config.from_object('config.DevelopmentConfig')
-else:
-    # Production
-    app.config.from_object('config.ProductionConfig')
 
-# Initialize session
-Session(app)
-
-# Initialize the database connection
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-# Import models after db initialization to avoid circular import issues
-from app.models import AirbnbReview, AirbnbRawData
+# Set SQLAlchemy object for Flask-Session
+app.config['SESSION_SQLALCHEMY'] = db
+
+# Initialize Flask-Session
+session = Session(app)
+
+# Import your blueprint
+from app.routes import bp as main_bp
 
 # Register the blueprint
 app.register_blueprint(main_bp)
 
 @app.route("/", methods=["GET"])
 def index():
-    print("Request for index page received")
+    logging.info("Request for index page received")
     return render_template("index.html")
 
 @app.route("/run_cleaning", methods=["POST"])
-@csrf.exempt
 def run_cleaning():
     try:
         # Your data processing logic here
         flash("Data processing completed successfully!")
     except Exception as e:
-        print(f"Error during data processing: {e}")
+        logging.error(f"Error during data processing: {e}")
         flash("An error occurred during data processing.")
     return redirect(url_for('index'))
 

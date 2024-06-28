@@ -4,6 +4,7 @@ from collections import defaultdict
 import logging
 import os
 import re
+import json
 from app.models import AirbnbRawData, AirbnbReview
 from app import db
 import openpyxl

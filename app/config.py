@@ -5,14 +5,15 @@ class Config:
     TEMP_DIR = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'temp')
     SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
     DEBUG = os.getenv('FLASK_DEBUG', 'False') == 'True'
-    SESSION_TYPE = 'filesystem'  # Ensure sessions are stored on the filesystem
+    SESSION_TYPE = 'sqlalchemy'  # Use SQLAlchemy for session management
+    SESSION_SQLALCHEMY = None  # This will be set in the app factory
 
 class DevelopmentConfig(Config):
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'postgresql://sqlAdmin:Airbnbdata1@sqldb-asdk4-strag4-w8qh.database.windows.net:1433/sqldb-tenant-asdk4-strag4-w8qh')
+    SQLALCHEMY_DATABASE_URI = os.getenv('AZURE_POSTGRESQL_CONNECTIONSTRING')
     DEBUG = True
 
 class ProductionConfig(Config):
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = os.getenv('AZURE_POSTGRESQL_CONNECTIONSTRING')
     DEBUG = False
 
 config = {

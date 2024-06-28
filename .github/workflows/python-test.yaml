@@ -21,33 +21,32 @@ jobs:
         env:
           POSTGRES_PASSWORD: postgres
         ports:
-        - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
+          - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
-        - uses: actions/checkout@v4
-        - name: Setup python
-          uses: actions/setup-python@v5
-          with:
-            python-version: ${{ matrix.python_version }}
-            architecture: x64
-        - name: Install dependencies
-          run: |
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-            pip install flake8
-        - name: Look for major issues with flake8
-          run: |
-            flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        - name: Make sure Python code is all compilable
-          run: |
-            python -m compileall . -f
-        - name: Run Flask server
-          run: |
-            flask db upgrade
-            flask run &
-          env:
-            DBNAME: postgres
-            DBHOST: localhost
-            DBUSER: postgres
-            DBPASS: postgres
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python_version }}
+          architecture: x64
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8
+      - name: Look for major issues with flake8
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      - name: Make sure Python code is all compilable
+        run: |
+          python -m compileall . -f
+      - name: Run Flask server
+        run: |
+          flask db upgrade
+          flask run &
+        env:
+          DBNAME: postgres
+          DBHOST: localhost
+          DBUSER: postgres
+          DBPASS: postgres

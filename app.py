@@ -1,10 +1,5 @@
-import os
-from datetime import datetime
-from flask import Flask, redirect, render_template, request, send_from_directory, url_for, flash, session
-from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
-from flask_wtf.csrf import CSRFProtect
-from flask_session import Session  # Import Session
+# Import your blueprint
+from app.routes import bp as main_bp
 
 app = Flask(__name__)
 csrf = CSRFProtect(app)
@@ -26,6 +21,9 @@ migrate = Migrate(app, db)
 
 # Import models after db initialization to avoid circular import issues
 from app.models import AirbnbReview, AirbnbRawData
+
+# Register the blueprint
+app.register_blueprint(main_bp)
 
 @app.route("/", methods=["GET"])
 def index():

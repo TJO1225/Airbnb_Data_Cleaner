@@ -10,54 +10,47 @@
     <div class="container">
         </br>
         </br>
-        <h1 style="text-align: center; text-decoration: underline; font-weight: bold;">Welcome to the Airbnb Data Cleaner</h1>
+        <h1 style="text-align: center; text-decoration: underline; font-weight: bold;">Airbnb Data Cleaner</h1>
         </br>
         <form action="{{ url_for('main.update_config') }}" method="POST">
-            <h2 style="text-decoration: underline">Search Variables</h2>
+            <h2 style="text-decoration: underline"> Listing Search</h2>   
+         </br>   
+            <label for="start_urls">Listing Link (or List of CSV Listing Links)</label>
+            <input type="url" id="start_urls" name="start_urls" class="form-control" value="">
+
+            <h2 style="text-decoration: underline">New Search</h2>
         </br>
-            <label for="location_query">Location Query:</label>
+            <label for="location_query">Location (City or Zip):</label>
             <input type="text" id="location_query" name="location_query" class="form-control" value="">
 
-            <label for="max_listings">Max Listings:</label>
-            <input type="number" id="max_listings" name="max_listings" class="form-control" value="10">
+            <label for="max_listings">Maximum Listing Limit:</label>
+            <input type="number" id="max_listings" name="max_listings" class="form-control" value="100">
 
-            <label for="include_reviews">Include Reviews:</label>
-            <input type="checkbox" id="include_reviews" name="include_reviews" checked class="form-check-input">
+            <label for="limit_points">Geographical Granularity:</label>
+            <input type="number" id="limit_points" name="limit_points" class="form-control" value="100">
 
-            <label for="max_reviews">Max Reviews:</label>
-            <input type="number" id="max_reviews" name="max_reviews" class="form-control" value="300">
-
-            <label for="calendar_months">Calendar Months:</label>
-            <input type="number" id="calendar_months" name="calendar_months" class="form-control" value="0">
-
-            <label for="add_more_host_info">Add More Host Info:</label>
-            <input type="checkbox" id="add_more_host_info" name="add_more_host_info" class="form-check-input">
-
-            <label for="currency">Currency:</label>
-            <input type="text" id="currency" name="currency" class="form-control" value="USD">
-
-            <label for="check_in">Check-In:</label>
+            <label for="check_in">Check In:</label>
             <input type="date" id="check_in" name="check_in" class="form-control">
 
-            <label for="check_out">Check-Out:</label>
+            <label for="check_out">Check Out:</label>
             <input type="date" id="check_out" name="check_out" class="form-control">
 
-            <label for="limit_points">Limit Points:</label>
-            <input type="number" id="limit_points" name="limit_points" class="form-control" value="100">
-        </br>
-            <h2 style="text-decoration: underline">General</h2>
-        </br>
-            <label for="output_file_name">Output File Name:</label>
-            <input type="text" id="output_file_name" name="output_file_name" class="form-control" value="">
+            <label for="minprice">Minimum Price Per Night</label>
+            <input type="number" id="minprice" name="minprice" class="form-control">
 
-            <label for="output_file_format">Output File Format:</label>
-            <select id="output_file_format" name="output_file_format" class="form-control">
-                <option value="csv">CSV</option>
-                <option value="xlsx" selected>Excel</option>
-            </select>
+            <label for="maxprice">Maximum Price Per Night</label>
+            <input type="number" id="maxprice" name="maxprice" class="form-control">
+        </br>
+            <h2 style="text-decoration: underline">Settings</h2>
+        </br>
+            <label for="max_reviews">Maximum Reviews:</label>
+            <input type="number" id="max_reviews" name="max_reviews" class="form-control" value="100">
 
-            <label for="min_bedrooms">Min Bedrooms:</label>
+            <label for="min_bedrooms">Minimum Bedrooms:</label>
             <input type="number" id="min_bedrooms" name="min_bedrooms" class="form-control" value="2">
+
+            <label for="calendar_months">Availability for Next Months:</label>
+            <input type="number" id="calendar_months" name="calendar_months" class="form-control" value="">
 
             <label for="high_season_override">High Season Override:</label>
             <select id="high_season_override" name="high_season_override" class="form-control">
@@ -67,43 +60,59 @@
                 <option value="Q3">Q3</option>
                 <option value="Q4">Q4</option>
             </select>
+
+            <label for="currency">Currency:</label>
+            <input type="text" id="currency" name="currency" class="form-control" value="USD">
         </br>
+            <label for="add_more_host_info">Add More Host Info (host URL and number of listings):</label>
+            <input type="checkbox" id="add_more_host_info" name="add_more_host_info" class="form-check-input">
+        </br>        
+        </br>
+            <label for="output_file_name">Output File Name:</label>
+            <input type="text" id="output_file_name" name="output_file_name" class="form-control" value="">
+        
+            <label for="output_file_format">Output File Format:</label>
+            <select id="output_file_format" name="output_file_format" class="form-control">
+                <option value="csv">CSV</option>
+                <option value="xlsx" selected>Excel</option>
+            </select>
+        </br>            
             <h2 style="text-decoration: underline">Logic Variables</h2>
         </br>
-            <h3>Good Data</h3>
-            <label for="total_months">Total Months:</label>
+            <h3>Good Review Data</h3>
+            <label for="min_reviews">Minimum Total Reviews:</label>
+            <input type="number" id="min_reviews" name="min_reviews" class="form-control" value="20">
+            
+            <label for="total_months">Minimum Total Months:</label>
             <input type="number" id="total_months" name="total_months" class="form-control" value="9">
 
-            <label for="missing_months">Missing Months:</label>
+            <label for="missing_months">Maximum Missing Months:</label>
             <input type="number" id="missing_months" name="missing_months" class="form-control" value="3">
 
-            <label for="avg_reviews_per_month">Avg Reviews Per Month:</label>
+            <label for="avg_reviews_per_month">Average Reviews Per Month:</label>
             <input type="number" id="avg_reviews_per_month" name="avg_reviews_per_month" class="form-control" value="2">
 
-            <label for="min_reviews">Min Reviews:</label>
-            <input type="number" id="min_reviews" name="min_reviews" class="form-control" value="20">
-
-            <label for="high_season_reviews">High Season Reviews:</label>
+            <label for="high_season_reviews">Minimum High Season Reviews:</label>
             <input type="number" id="high_season_reviews" name="high_season_reviews" class="form-control" value="6">
         </br>
-            <h3>Possibly Good Data</h3>
-            <label for="total_months_pgd">Total Months:</label>
+            <h3>Possibly Good Review Data</h3>
+            <label for="min_reviews_pgd">Minimum Total Reviews:</label>
+            <input type="number" id="min_reviews_pgd" name="min_reviews_pgd" class="form-control" value="10">
+            
+            <label for="total_months_pgd">Minimum Total Months:</label>
             <input type="number" id="total_months_pgd" name="total_months_pgd" class="form-control" value="7">
 
-            <label for="missing_months_pgd">Missing Months:</label>
+            <label for="missing_months_pgd">Maximum Missing Months:</label>
             <input type="number" id="missing_months_pgd" name="missing_months_pgd" class="form-control" value="2">
 
-            <label for="avg_reviews_per_month_pgd">Avg Reviews Per Month:</label>
+            <label for="avg_reviews_per_month_pgd">Average Reviews Per Month:</label>
             <input type="number" id="avg_reviews_per_month_pgd" name="avg_reviews_per_month_pgd" class="form-control" value="1">
 
-            <label for="min_reviews_pgd">Min Reviews:</label>
-            <input type="number" id="min_reviews_pgd" name="min_reviews_pgd" class="form-control" value="10">
-
-            <label for="high_season_reviews_pgd">High Season Reviews:</label>
+            <label for="high_season_reviews_pgd">Minimum High Season Reviews:</label>
             <input type="number" id="high_season_reviews_pgd" name="high_season_reviews_pgd" class="form-control" value="4">
     </br>
     <div style="text-align: center;">
-        <button type="submit" class="btn btn-success mt-3" style="width: 200px; height: 50px;">Run Data Cleaning</button>
+        <button type="submit" class="btn btn-success mt-3" style="width: 200px; height: 50px;">Go</button>
     </br>
     </br>
     </br>    

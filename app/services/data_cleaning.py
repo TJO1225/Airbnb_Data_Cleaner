@@ -5,9 +5,6 @@ import logging
 import os
 import re
 import json
-from app.models import AirbnbRawData, AirbnbReview
-from app import db
-import openpyxl
 
 logging.basicConfig(level=logging.INFO)
 
@@ -24,12 +21,14 @@ def calculate_high_season(reviews, high_season_override):
     return high_season, high_season_reviews
 
 def get_thresholds(config):
-    return {
+    thresholds = {
         "good_data": config["Logic Variables"].get("Good Data", {}),
         "possibly_good_data": config["Logic Variables"].get("Possibly Good Data", {}),
         "high_season_override": config["General"].get("high_season_override", ""),
-        "min_bedrooms": config["General"].get("min_bedrooms")  
+        "min_bedrooms": config["General"].get("min_bedrooms", 0)
     }
+    logging.info(f"Thresholds loaded: {thresholds}")
+    return thresholds
 
 class AirbnbDataCleaner:
     def __init__(self, airbnb_data):
@@ -38,23 +37,21 @@ class AirbnbDataCleaner:
         self.high_season = None
         self.high_season_reviews = 0
 
-    def load_data(self, file_path):
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                self.raw_data = json.load(f)
-        except FileNotFoundError:
-            logging.error(f"File not found: {file_path}")
-        except json.JSONDecodeError:
-            logging.error(f"Invalid JSON format in file: {file_path}")
+        # Add Bedrooms count to each listing during initialization
+        for listing in self.airbnb_data:
+            listing["Bedrooms"] = self.get_bedroom_count(listing)
+            logging.info(f"Extracted Bedrooms for listing {listing.get('id')}: {listing['Bedrooms']}")
 
     def get_reviews(self, listing):
         return listing.get("reviews", [])
 
     def get_bedroom_count(self, listing):
         bedroom_label = listing.get("bedroomLabel", "0")
+        if "studio" in bedroom_label.lower():
+            return 0
         match = re.search(r"(\d+)", bedroom_label)
         if match:
-            return int(match.group(1))
+            return int(match.group(1))  # Ensure the result is an integer
         return 0
 
     def get_historical_data(self, reviews):
@@ -109,20 +106,32 @@ class AirbnbDataCleaner:
             else:
                 historical_data["high_season_reviews"] = 0
             historical_data["high_season"] = self.high_season
-            category, reason = self.categorize_listing(listing, historical_data, thresholds)
             listing_with_data = listing.copy()
+
+            # Add logging for Bedrooms and min_bedrooms check
+            logging.info(f"Listing {idx} Bedrooms: {listing_with_data['Bedrooms']}")
+
+            # Check if Bedrooms meet the minimum requirement
+            if listing_with_data["Bedrooms"] < thresholds["min_bedrooms"]:
+                category = "Not Good Data"
+                reason = f"Only {listing_with_data['Bedrooms']} bedrooms, requires at least {thresholds['min_bedrooms']} bedrooms"
+            else:
+                category, reason = self.categorize_listing(listing_with_data, historical_data, thresholds)
+
             listing_with_data.update(historical_data)
             listing_with_data["Quality Rating Reason"] = reason
             listing_with_data["High Season Insights"] = (
                 f"{historical_data['high_season_reviews']} Reviews in Q{self.high_season}" if self.high_season else "No high season"
             )
             self.cleaned_data[category].append(listing_with_data)
-            logging.info(f"Listing {idx}: {category} ({historical_data})")
+            logging.info(f"Listing {idx}: {category} ({historical_data}) - Reason: {reason}")
         return self.cleaned_data
 
     def categorize_listing(self, listing, historical_data, thresholds):
         good_data_thresholds = thresholds.get("good_data", {})
         possibly_good_data_thresholds = thresholds.get("possibly_good_data", {})
+
+        logging.info(f"Categorizing listing {listing.get('id')} with Bedrooms: {listing['Bedrooms']}")
 
         if self.is_good_data(listing, historical_data, good_data_thresholds):
             return "Good Data", "Good data"
@@ -134,74 +143,44 @@ class AirbnbDataCleaner:
         return "Not Good Data", reason
 
     def is_good_data(self, listing, historical_data, thresholds):
-        min_bedrooms = thresholds.get("min_bedrooms", float("inf"))
-        return (
-            historical_data["total_months"]
-            >= thresholds.get("total_months", float("inf"))
-            and historical_data["missing_months"]
-            <= thresholds.get("missing_months", float("-inf"))
-            and historical_data["avg_reviews_per_month"]
-            >= thresholds.get("avg_reviews_per_month", float("-inf"))
-            and historical_data["total_reviews"]
-            >= thresholds.get("min_reviews", float("inf"))
-            and self.get_bedroom_count(listing)
-            >= min_bedrooms
-            and historical_data["high_season_reviews"]
-            >= thresholds.get("high_season_reviews", float("-inf"))
+        result = (
+            historical_data["total_months"] >= thresholds.get("total_months", float("inf"))
+            and historical_data["missing_months"] <= thresholds.get("missing_months", float("-inf"))
+            and historical_data["avg_reviews_per_month"] >= thresholds.get("avg_reviews_per_month", float("-inf"))
+            and historical_data["total_reviews"] >= thresholds.get("min_reviews", float("inf"))
+            and listing["Bedrooms"] >= thresholds.get("min_bedrooms", 0)
+            and historical_data["high_season_reviews"] >= thresholds.get("high_season_reviews", float("-inf"))
         )
+        logging.info(f"Checking if listing {listing.get('id')} is good data: {result}")
+        return result
 
     def is_possibly_good_data(self, listing, historical_data, thresholds):
-        min_bedrooms = thresholds.get("min_bedrooms", float("inf"))
-        return (
-            thresholds.get("total_months", float("inf"))
-            > historical_data["total_months"]
-            >= thresholds.get("total_months", float("-inf"))
-            and historical_data["missing_months"]
-            <= thresholds.get("missing_months", float("-inf"))
-            and historical_data["avg_reviews_per_month"]
-            >= thresholds.get("avg_reviews_per_month", float("-inf"))
-            and historical_data["total_reviews"]
-            >= thresholds.get("min_reviews", float("inf"))
-            and self.get_bedroom_count(listing)
-            >= min_bedrooms
-            and historical_data["high_season_reviews"]
-            >= thresholds.get("high_season_reviews", float("-inf"))
+        result = (
+            thresholds.get("total_months", float("inf")) > historical_data["total_months"] >= thresholds.get("total_months", float("-inf"))
+            and historical_data["missing_months"] <= thresholds.get("missing_months", float("-inf"))
+            and historical_data["avg_reviews_per_month"] >= thresholds.get("avg_reviews_per_month", float("-inf"))
+            and historical_data["total_reviews"] >= thresholds.get("min_reviews", float("inf"))
+            and listing["Bedrooms"] >= thresholds.get("min_bedrooms", 0)
+            and historical_data["high_season_reviews"] >= thresholds.get("high_season_reviews", float("-inf"))
         )
+        logging.info(f"Checking if listing {listing.get('id')} is possibly good data: {result}")
+        return result
 
     def not_good_data_reason(self, listing, historical_data, thresholds):
         reasons = []
-        if historical_data["total_reviews"] < thresholds.get(
-            "min_reviews", float("inf")
-        ):
+        if historical_data["total_reviews"] < thresholds.get("min_reviews", float("inf")):
             reasons.append(f"Less than {thresholds.get('min_reviews')} total reviews")
-        if historical_data["total_months"] < thresholds.get(
-            "total_months", float("inf")
-        ):
-            reasons.append(
-                f"Only {historical_data['total_months']} months of historical data"
-            )
-        if historical_data["missing_months"] > thresholds.get(
-            "missing_months", float("-inf")
-        ):
-            reasons.append(
-                f"More than {thresholds.get('missing_months')} missing months of data"
-            )
-        if historical_data["avg_reviews_per_month"] < thresholds.get(
-            "avg_reviews_per_month", float("-inf")
-        ):
-            reasons.append(
-                f"Less than {thresholds.get('avg_reviews_per_month')} reviews per month on average"
-            )
-        if self.get_bedroom_count(listing) < thresholds.get(
-            "min_bedrooms", float("inf")
-        ):
-            reasons.append(f"Only {self.get_bedroom_count(listing)} bedrooms")
-        if historical_data["high_season_reviews"] < thresholds.get(
-            "high_season_reviews", float("-inf")
-        ):
-            reasons.append(
-                f"Less than {thresholds.get('high_season_reviews')} reviews in high season"
-            )
+        if historical_data["total_months"] < thresholds.get("total_months", float("inf")):
+            reasons.append(f"Only {historical_data['total_months']} months of historical data")
+        if historical_data["missing_months"] > thresholds.get("missing_months", float("-inf")):
+            reasons.append(f"More than {thresholds.get('missing_months')} missing months of data")
+        if historical_data["avg_reviews_per_month"] < thresholds.get("avg_reviews_per_month", float("-inf")):
+            reasons.append(f"Less than {thresholds.get('avg_reviews_per_month')} reviews per month on average")
+        if listing["Bedrooms"] < thresholds.get("min_bedrooms", 0):
+            reasons.append(f"Only {listing['Bedrooms']} bedrooms, requires at least {thresholds.get('min_bedrooms')} bedrooms")
+        if historical_data["high_season_reviews"] < thresholds.get("high_season_reviews", float("-inf")):
+            reasons.append(f"Less than {thresholds.get('high_season_reviews')} reviews in high season")
+        logging.info(f"Not Good Data Reason for listing {listing.get('id')}: {reasons}")
         return "; ".join(reasons)
 
     def create_dataframe(self, cleaned_data):
@@ -209,6 +188,7 @@ class AirbnbDataCleaner:
             "Listing Name",
             "Data Quality Category",
             "Quality Rating Reason",
+            "Bedrooms",
             "total_reviews",
             "total_months",
             "missing_months",
@@ -216,12 +196,12 @@ class AirbnbDataCleaner:
             "high_season_reviews",
             "high_season",
             "High Season Insights",
-            "bedroomLabel",
             "numberOfGuests",
             "url",
             "name",
             "Location",
             "stars",
+            
         ]
 
         data = []
@@ -231,6 +211,7 @@ class AirbnbDataCleaner:
                     "Listing Name": listing["name"],
                     "Data Quality Category": category,
                     "Quality Rating Reason": listing["Quality Rating Reason"],
+                    "Bedrooms": listing.get("Bedrooms", 0),
                     "total_reviews": listing["total_reviews"],
                     "total_months": listing["total_months"],
                     "missing_months": listing["missing_months"],
@@ -238,12 +219,12 @@ class AirbnbDataCleaner:
                     "high_season_reviews": listing["high_season_reviews"],
                     "high_season": listing["high_season"],
                     "High Season Insights": listing["High Season Insights"],
-                    "bedroomLabel": listing.get("bedroomLabel", ""),
                     "numberOfGuests": listing.get("numberOfGuests", ""),
                     "url": listing.get("url", ""),
                     "name": listing.get("name", ""),
                     "Location": listing.get("Location", ""),
                     "stars": listing.get("stars", 0),
+                    
                 }
                 additional_columns = {k: v for k, v in listing.items() if k not in row}
                 row.update(additional_columns)
@@ -289,3 +270,49 @@ def save_data(df, output_file_path, output_file_format):
     else:
         logging.error(f"File not found after save attempt: {output_file_path}")
 
+def clean_airbnb_data(raw_data_entries, config):
+    logging.info("Starting to clean Airbnb data.")
+    if not isinstance(raw_data_entries, list) or not all(isinstance(entry, dict) for entry in raw_data_entries):
+        logging.error("Invalid data format received for cleaning.")
+        raise ValueError("Invalid data format received for cleaning.")
+    data_cleaner = AirbnbDataCleaner(raw_data_entries)
+    thresholds = get_thresholds(config)
+    cleaned_data = data_cleaner.clean_data(thresholds)
+    df = data_cleaner.create_dataframe(cleaned_data)
+    logging.info("Airbnb data cleaned successfully.")
+    return df
+
+def save_data(df, output_file_path, output_file_format):
+    logging.info(f"Saving data to: {output_file_path} with format: {output_file_format}")
+    if output_file_format == "csv":
+        df.to_csv(output_file_path, index=False)
+    elif output_file_format == "xlsx":
+        df.to_excel(output_file_path, index=False, engine='openpyxl')
+    if os.path.exists(output_file_path):
+        logging.info(f"File successfully saved: {output_file_path}")
+    else:
+        logging.error(f"File not found after save attempt: {output_file_path}")
+
+
+def clean_airbnb_data(raw_data_entries, config):
+    logging.info("Starting to clean Airbnb data.")
+    if not isinstance(raw_data_entries, list) or not all(isinstance(entry, dict) for entry in raw_data_entries):
+        logging.error("Invalid data format received for cleaning.")
+        raise ValueError("Invalid data format received for cleaning.")
+    data_cleaner = AirbnbDataCleaner(raw_data_entries)
+    thresholds = get_thresholds(config)
+    cleaned_data = data_cleaner.clean_data(thresholds)
+    df = data_cleaner.create_dataframe(cleaned_data)
+    logging.info("Airbnb data cleaned successfully.")
+    return df
+
+def save_data(df, output_file_path, output_file_format):
+    logging.info(f"Saving data to: {output_file_path} with format: {output_file_format}")
+    if output_file_format == "csv":
+        df.to_csv(output_file_path, index=False)
+    elif output_file_format == "xlsx":
+        df.to_excel(output_file_path, index=False, engine='openpyxl')
+    if os.path.exists(output_file_path):
+        logging.info(f"File successfully saved: {output_file_path}")
+    else:
+        logging.error(f"File not found after save attempt: {output_file_path}")

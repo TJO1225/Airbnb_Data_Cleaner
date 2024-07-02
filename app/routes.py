@@ -29,44 +29,67 @@ def index():
 @bp.route('/update_config', methods=['POST'])
 def update_config():
     form_data = request.form.to_dict(flat=False)
+    logging.info(f"Form data received: {form_data}")
 
-    # Convert form data to proper nested dictionary structure
+    # Function to safely convert to integer
+    def safe_int(value, default=0):
+        """
+        Safely convert a value to an integer, defaulting to 0 if the conversion fails.
+        """
+        try:
+            return int(value) if value and str(value).isdigit() else default
+        except (ValueError, TypeError):
+            return default
+
+    # Extract start_urls and check if it's provided and not empty
+    start_urls = form_data.get("start_urls", [""])
+
+    # Initialize the config dictionary with Search Variables that are always included
     config = {
         "Search Variables": {
-            "location_query": form_data.get("location_query", [""])[0],
-            "max_listings": int(form_data.get("max_listings", [0])[0]),
-            "include_reviews": form_data.get("include_reviews", ["false"])[0].lower() == 'true',
-            "max_reviews": int(form_data.get("max_reviews", [0])[0]),
-            "calendar_months": int(form_data.get("calendar_months", [0])[0]),
+            "start_urls": start_urls,
+            "include_reviews": True,
+            "max_reviews": safe_int(form_data.get("max_reviews", [0])[0]),
+            "calendar_months": safe_int(form_data.get("calendar_months", [0])[0]),
             "add_more_host_info": form_data.get("add_more_host_info", ["false"])[0].lower() == 'true',
             "currency": form_data.get("currency", [""])[0],
-            "check_in": form_data.get("check_in", [""])[0],
-            "check_out": form_data.get("check_out", [""])[0],
-            "limit_points": int(form_data.get("limit_points", [0])[0])
+            # Default values for fields when start_urls is provided
+            "check_in": "" if start_urls else form_data.get("check_in", [""])[0],
+            "check_out": "" if start_urls else form_data.get("check_out", [""])[0],
+            "limit_points": safe_int(form_data.get("limit_points", [0])[0]),
+            "minprice": 0 if start_urls else safe_int(form_data.get("minprice", [0])[0]),
+            "maxprice": 0 if start_urls else safe_int(form_data.get("maxprice", [0])[0]),
         },
         "Logic Variables": {
             "Good Data": {
-                "total_months": int(form_data.get("total_months", [0])[0]),
-                "missing_months": int(form_data.get("missing_months", [0])[0]),
-                "avg_reviews_per_month": int(form_data.get("avg_reviews_per_month", [0])[0]),
-                "min_reviews": int(form_data.get("min_reviews", [0])[0]),
-                "high_season_reviews": int(form_data.get("high_season_reviews", [0])[0])
+                "total_months": safe_int(form_data.get("total_months", [0])[0]),
+                "missing_months": safe_int(form_data.get("missing_months", [0])[0]),
+                "avg_reviews_per_month": safe_int(form_data.get("avg_reviews_per_month", [0])[0]),
+                "min_reviews": safe_int(form_data.get("min_reviews", [0])[0]),
+                "high_season_reviews": safe_int(form_data.get("high_season_reviews", [0])[0])
             },
             "Possibly Good Data": {
-                "total_months": int(form_data.get("total_months_pgd", [0])[0]),
-                "missing_months": int(form_data.get("missing_months_pgd", [0])[0]),
-                "avg_reviews_per_month": int(form_data.get("avg_reviews_per_month_pgd", [0])[0]),
-                "min_reviews": int(form_data.get("min_reviews_pgd", [0])[0]),
-                "high_season_reviews": int(form_data.get("high_season_reviews_pgd", [0])[0])
+                "total_months": safe_int(form_data.get("total_months_pgd", [0])[0]),
+                "missing_months": safe_int(form_data.get("missing_months_pgd", [0])[0]),
+                "avg_reviews_per_month": safe_int(form_data.get("avg_reviews_per_month_pgd", [0])[0]),
+                "min_reviews": safe_int(form_data.get("min_reviews_pgd", [0])[0]),
+                "high_season_reviews": safe_int(form_data.get("high_season_reviews_pgd", [0])[0])
             }
         },
         "General": {
             "output_file_name": form_data.get("output_file_name", [""])[0],
             "output_file_format": form_data.get("output_file_format", [""])[0],
             "high_season_override": form_data.get("high_season_override", [""])[0],
-            "min_bedrooms": int(form_data.get("min_bedrooms", [0])[0])
+            "min_bedrooms": safe_int(form_data.get("min_bedrooms", [0])[0])
         }
-    }
+        }
+    
+    logging.info(f"Config data constructed: {config}")
+
+    # Conditionally add location_query and ensure max_listings defaults to zero
+    if not start_urls or start_urls == [""]:
+        config["Search Variables"]["location_query"] = form_data.get("location_query", [""])[0]
+    config["Search Variables"]["max_listings"] = safe_int(form_data.get("max_listings", [0])[0], 0)
 
     session['config_data'] = config
     processing_status['complete'] = False
@@ -103,6 +126,8 @@ def run_cleaning():
     if not config:
         flash("Configuration data is missing.")
         return redirect(url_for('main.index'))
+
+    logging.info(f"Running cleaning with config: {config}")
 
     app = current_app._get_current_object()
     threading.Thread(target=background_task, args=(app, config)).start()

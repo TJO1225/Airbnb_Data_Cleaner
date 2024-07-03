@@ -15,7 +15,7 @@
         <form action="{{ url_for('main.update_config') }}" method="POST">
             <h2 style="text-decoration: underline"> Listing Search</h2>   
          </br>   
-            <label for="start_urls">Listing Link (or List of CSV Listing Links)</label>
+            <label for="start_urls">Listing Link (or List of [space delimited] Links)</label>
             <input type="url" id="start_urls" name="start_urls" class="form-control" value="">
 
             <h2 style="text-decoration: underline">New Search</h2>
@@ -24,7 +24,7 @@
             <input type="text" id="location_query" name="location_query" class="form-control" value="">
 
             <label for="max_listings">Maximum Listing Limit:</label>
-            <input type="number" id="max_listings" name="max_listings" class="form-control" value="100">
+            <input type="number" id="max_listings" name="max_listings" class="form-control" value="1000">
 
             <label for="limit_points">Geographical Granularity:</label>
             <input type="number" id="limit_points" name="limit_points" class="form-control" value="100">
@@ -47,7 +47,7 @@
             <input type="number" id="max_reviews" name="max_reviews" class="form-control" value="100">
 
             <label for="min_bedrooms">Minimum Bedrooms:</label>
-            <input type="number" id="min_bedrooms" name="min_bedrooms" class="form-control" value="2">
+            <input type="number" id="min_bedrooms" name="min_bedrooms" class="form-control" value="0">
 
             <label for="calendar_months">Availability for Next Months:</label>
             <input type="number" id="calendar_months" name="calendar_months" class="form-control" value="">
@@ -90,7 +90,7 @@
             <input type="number" id="missing_months" name="missing_months" class="form-control" value="3">
 
             <label for="avg_reviews_per_month">Average Reviews Per Month:</label>
-            <input type="number" id="avg_reviews_per_month" name="avg_reviews_per_month" class="form-control" value="2">
+            <input type="number" id="avg_reviews_per_month" name="avg_reviews_per_month" class="form-control" value="2" step="any">
 
             <label for="high_season_reviews">Minimum High Season Reviews:</label>
             <input type="number" id="high_season_reviews" name="high_season_reviews" class="form-control" value="6">
@@ -106,7 +106,7 @@
             <input type="number" id="missing_months_pgd" name="missing_months_pgd" class="form-control" value="2">
 
             <label for="avg_reviews_per_month_pgd">Average Reviews Per Month:</label>
-            <input type="number" id="avg_reviews_per_month_pgd" name="avg_reviews_per_month_pgd" class="form-control" value="1">
+            <input type="number" id="avg_reviews_per_month_pgd" name="avg_reviews_per_month_pgd" class="form-control" value="1.5" step="any">
 
             <label for="high_season_reviews_pgd">Minimum High Season Reviews:</label>
             <input type="number" id="high_season_reviews_pgd" name="high_season_reviews_pgd" class="form-control" value="4">

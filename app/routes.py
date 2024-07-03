@@ -41,37 +41,55 @@ def update_config():
         except (ValueError, TypeError):
             return default
 
+    def safe_float(value, default=0.0):
+        """
+        Safely convert a value to a float, defaulting to 0.0 if the conversion fails.
+        """
+        try:
+            return float(value) if value and str(value).replace('.', '', 1).isdigit() else default
+        except (ValueError, TypeError):
+            return default
+
     # Extract start_urls and check if it's provided and not empty
-    start_urls = form_data.get("start_urls", [""])
+    start_urls = form_data.get("start_urls", [""])[0]  # Assume the first item in the list is the actual string input
+
+    # Check if start_urls is a string and not empty, then split by spaces; otherwise, use it directly if it's a list
+    if isinstance(start_urls, str) and start_urls.strip():
+        urls_list = start_urls.split()
+    else:
+        urls_list = []
+
+    # Format each URL into the required dictionary format
+    formatted_urls = [{"url": url.strip()} for url in urls_list if url.strip()]
 
     # Initialize the config dictionary with Search Variables that are always included
     config = {
         "Search Variables": {
-            "start_urls": start_urls,
+            "start_urls": formatted_urls,
             "include_reviews": True,
             "max_reviews": safe_int(form_data.get("max_reviews", [0])[0]),
             "calendar_months": safe_int(form_data.get("calendar_months", [0])[0]),
             "add_more_host_info": form_data.get("add_more_host_info", ["false"])[0].lower() == 'true',
             "currency": form_data.get("currency", [""])[0],
             # Default values for fields when start_urls is provided
-            "check_in": "" if start_urls else form_data.get("check_in", [""])[0],
-            "check_out": "" if start_urls else form_data.get("check_out", [""])[0],
+            "check_in": "" if formatted_urls else form_data.get("check_in", [""])[0],
+            "check_out": "" if formatted_urls else form_data.get("check_out", [""])[0],
             "limit_points": safe_int(form_data.get("limit_points", [0])[0]),
-            "minprice": 0 if start_urls else safe_int(form_data.get("minprice", [0])[0]),
-            "maxprice": 0 if start_urls else safe_int(form_data.get("maxprice", [0])[0]),
+            "minprice": 0 if formatted_urls else safe_int(form_data.get("minprice", [0])[0]),
+            "maxprice": 0 if formatted_urls else safe_int(form_data.get("maxprice", [0])[0]),
         },
         "Logic Variables": {
             "Good Data": {
                 "total_months": safe_int(form_data.get("total_months", [0])[0]),
                 "missing_months": safe_int(form_data.get("missing_months", [0])[0]),
-                "avg_reviews_per_month": safe_int(form_data.get("avg_reviews_per_month", [0])[0]),
+                "avg_reviews_per_month": safe_float(form_data.get("avg_reviews_per_month", [0])[0]),
                 "min_reviews": safe_int(form_data.get("min_reviews", [0])[0]),
                 "high_season_reviews": safe_int(form_data.get("high_season_reviews", [0])[0])
             },
             "Possibly Good Data": {
                 "total_months": safe_int(form_data.get("total_months_pgd", [0])[0]),
                 "missing_months": safe_int(form_data.get("missing_months_pgd", [0])[0]),
-                "avg_reviews_per_month": safe_int(form_data.get("avg_reviews_per_month_pgd", [0])[0]),
+                "avg_reviews_per_month": safe_float(form_data.get("avg_reviews_per_month_pgd", [0])[0]),
                 "min_reviews": safe_int(form_data.get("min_reviews_pgd", [0])[0]),
                 "high_season_reviews": safe_int(form_data.get("high_season_reviews_pgd", [0])[0])
             }
@@ -82,13 +100,17 @@ def update_config():
             "high_season_override": form_data.get("high_season_override", [""])[0],
             "min_bedrooms": safe_int(form_data.get("min_bedrooms", [0])[0])
         }
-        }
-    
+    }
+
     logging.info(f"Config data constructed: {config}")
 
-    # Conditionally add location_query and ensure max_listings defaults to zero
-    if not start_urls or start_urls == [""]:
+    # Adjust the configuration logic to conditionally include or exclude 'location_query'
+    if not formatted_urls:
         config["Search Variables"]["location_query"] = form_data.get("location_query", [""])[0]
+    else:
+        # If start_urls is provided, ensure 'location_query' is not included in the configuration
+        config["Search Variables"].pop("location_query", None)  # Remove 'location_query' if it exists
+
     config["Search Variables"]["max_listings"] = safe_int(form_data.get("max_listings", [0])[0], 0)
 
     session['config_data'] = config
